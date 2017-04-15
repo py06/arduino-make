@@ -23,7 +23,6 @@
 #include <LiquidCrystal.h>
 #include <dht.h>
 #include <stdio.h>
-#include <util/delay.h>
 
 #define AREF_VOLTAGE 3.3
 #define TEMP_PIN 1
@@ -61,7 +60,7 @@ void setup()
 	lcd.ops.print(&lcd, "LM35 v3");    // change text to whatever you like. keep it clean!
 	lcd.ops.setCursor(&lcd, 0, 1);           // set cursor to column 0, row 1
 	lcd.ops.print(&lcd, "peewhy.net");
-	_delay_ms(2000);
+	delay(2000);
 
 }
 
@@ -109,7 +108,6 @@ int main(int argc, char *argv[])
 #endif
 	setup();
 	Serial.println(millis());
-	Serial.println(" 2 \n");
 	timer = millis();
 
 	for(;;) {
