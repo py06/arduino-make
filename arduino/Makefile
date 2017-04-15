@@ -15,10 +15,10 @@ AVRDUDE_CONF = /etc/avrdude.conf
 ARCHITECTURE = avr
 ARDMK_VENDOR = arduino
 CURRENT_OS = LINUX
-MCU = atmega328p
-CORE = arduino
-VARIANT = standard
-ARDUINO_VERSION = 105
+#MCU = atmega328p
+#CORE = arduino
+#VARIANT = mega
+#ARDUINO_VERSION = 105
 CC=avr-gcc
 CPP=avr-g++
 INC = -I/usr/lib/avr/include\
@@ -27,11 +27,19 @@ INC = -I/usr/lib/avr/include\
 
 LIBRARIES = -L/usr/lib/avr
 
-CC_FLAGS=-D__AVR_ATMEGA328P__ -Os -DF_CPU=16000000UL -mmcu=atmega328p\
+CPP_FLAGS=-MMD -DF_CPU=16000000UL -mmcu=atmega328p\
 	-DARDUINO=105\
 	-D__PROG_TYPES_COMPAT__\
+	-Os -std=gnu++11 -flto -fno-threadsafe-statics\
+	-fpermissive -fno-exceptions\
 	-Wall -ffunction-sections -fdata-sections
-AR=avr-ar
+
+CC_FLAGS=-MMD -DF_CPU=16000000UL -mmcu=atmega328p\
+	-DARDUINO=105\
+	-D__PROG_TYPES_COMPAT__\
+	-Os -std=gnu11 -flto -fno-fat-lto-objects\
+	-Wall -ffunction-sections -fdata-sections
+AR=avr-gcc-ar
 
 C_SOURCES = $(wildcard *.c)
 CPP_SOURCES := $(filter-out main.cpp, $(wildcard *.cpp))
@@ -44,18 +52,11 @@ CPP_OBJECTS = $(CPP_SOURCES:.cpp=.cpp.o)
 
 %.cpp.o: %.cpp
 	@echo "$< $@ INC=$(INC)"
-	$(CPP) $(INC) $(CC_FLAGS) -c $< -o $@
+	$(CPP) $(INC) $(CPP_FLAGS) -c $< -o $@
 
 libarduino: $(CPP_OBJECTS) $(C_OBJECTS)
 	$(AR) rcs libarduino.a $(CPP_OBJECTS) $(C_OBJECTS)
 
-
+.PHONY: clean
 clean:
 	rm -f libarduino.a *.o
-
-# avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c -o led.o led.c
-# avr-gcc -mmcu=atmega328p led.o -o led
-# avr-objcopy -O ihex -R .eeprom led led.hex
-# avrdude -F -V -c arduino -p ATMEGA328P -P /dev/ttyACM0 -b 115200 -U flash:w:led.hex
-
-# !!! Important. You have to use make ispload to upload when using ISP programmer
