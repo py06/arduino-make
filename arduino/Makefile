@@ -59,4 +59,4 @@ libarduino: $(CPP_OBJECTS) $(C_OBJECTS)
 
 .PHONY: clean
 clean:
-	rm -f libarduino.a *.o
+	rm -f libarduino.a *.o *.d
