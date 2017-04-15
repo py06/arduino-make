@@ -19,16 +19,20 @@ ISP_PORT = /dev/ttyACM*
 AVRDUDE      = /usr/bin/avrdude
 AVRDUDE_CONF = /etc/avrdude.conf
 
-DEFINES=-DARDUINO_MAIN -D__AVR_ATmega328P__
 CC=avr-gcc
 CPP=avr-g++
 AR=avr-ar
+SIZE=avr-size
 OBJCOPY=avr-objcopy
-CC_FLAGS=-D__AVR_ATMEGA328P__ -Os -DF_CPU=16000000UL -mmcu=atmega328p\
-	-DARDUINO=105 -DARDUINO_ARCH_AVR\
-	-D__AVR_ATmega328P__1 -DBOARD_TAG=uno\
+CC_FLAGS=-MMD -DF_CPU=16000000UL -mmcu=atmega328p\
+	-DARDUINO=105\
 	-D__PROG_TYPES_COMPAT__\
+	-fpermissive -fno-exceptions -flto\
+	-std=gnu++11 -fno-threadsafe-statics\
 	-Wall -ffunction-sections -fdata-sections
+
+LDFLAGS = -lc -lm
+LDFLAGS += -flto -fuse-linker-plugin -larduino
 
 SOURCES = $(wildcard *.c)
 OBJECTS = $(SOURCES:.c=.o)
@@ -36,23 +40,21 @@ TARGET = thermometer
 
 $(TARGET).hex: $(TARGET)
 	$(OBJCOPY) -O ihex -R .eeprom  $(TARGET) $(TARGET).hex
+	make size
 
 $(TARGET): $(OBJECTS)
-	$(CC) -mmcu=atmega328p $(LIBRARIES) $(OBJECTS) -larduino -o $(TARGET)
+	$(CPP) -mmcu=atmega328p $(LIBRARIES) $(OBJECTS) $(LDFLAGS) -o $(TARGET)
 
 %.o: %.c
 	$(CPP) -c $(INCLUDE) $(CC_FLAGS) $< -o $@
 
+.PHONY: clean
 clean:
 	rm -f $(TARGET).hex $(TARGET) $(OBJECTS)
 
+.PHONY: size
+size:
+	$(SIZE) --mcu=atmega328p --format=avr $(TARGET)
 
 upload: $(TARGET).hex
 	$(AVRDUDE) -C /etc/avrdude.conf -q -D -V -c arduino -p ATMEGA328P -P /dev/ttyACM0 -b 115200 -U flash:w:$(TARGET).hex:i
-
-# avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c -o led.o led.c
-# avr-gcc -mmcu=atmega328p led.o -o led
-# avr-objcopy -O ihex -R .eeprom led led.hex
-# avrdude -F -V -c arduino -p ATMEGA328P -P /dev/ttyACM0 -b 115200 -U flash:w:led.hex
-
-# !!! Important. You have to use make ispload to upload when using ISP programmer
