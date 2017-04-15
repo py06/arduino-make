@@ -50,12 +50,13 @@ $(TARGET).hex: $(TARGET)
 	$(OBJCOPY) -O ihex -R .eeprom  $(TARGET) $(TARGET).hex
 	make size
 
-libarduino:
+.PHONY: libarduino
+libarduino: ./arduino/libarduino.a
+
+./arduino/libarduino.a:
 	make -C arduino libarduino
 
-arduino/libarduino.a: libarduino
-
-$(TARGET): arduino/libarduino.a $(OBJECTS)
+$(TARGET): ./arduino/libarduino.a $(OBJECTS)
 	$(CPP) -mmcu=atmega328p $(LIBPATH) $(OBJECTS) $(LDFLAGS) -o $(TARGET)
 
 %.o: %.c
