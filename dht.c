@@ -15,6 +15,10 @@
 #define TIMEOUT 10000
 static uint8_t bits[128];
 
+union _dht_ops dht_default_ops = {
+	.read11 = read11,
+};
+
 /////////////////////////////////////////////////////
 //
 // PRIVATE
@@ -79,6 +83,15 @@ static int read(struct dht *dht, uint8_t pin)
 //
 // PUBLIC
 //
+
+int dht_init(struct dht *dht)
+{
+	dht->humidity = 0;
+	dht->temperature = 0;
+	dht_set_ops(dht, &dht_default_ops);
+	return 0;
+}
+
 int dht_set_ops(struct dht *dht, union _dht_ops *ops)
 {
 	dht->ops = *ops;

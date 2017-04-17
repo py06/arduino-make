@@ -17,6 +17,11 @@
 
 struct dht;
 
+int dht_init(struct dht *dht);
+int read11(struct dht *, uint8_t);
+int read22(struct dht *, uint8_t);
+int dht_set_ops(struct dht *dht, union _dht_ops *ops);
+
 union _dht_ops {
 	int (*read11)(struct dht *, uint8_t);
 	int (*read22)(struct dht *, uint8_t);
