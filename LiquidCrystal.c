@@ -5,7 +5,7 @@
 #include <inttypes.h>
 #include <Arduino.h>
 
-struct lcd_ops default_ops = {
+struct lcd_ops lcd_default_ops = {
 	.begin = begin,
 	.clear = clear,
 	.setCursor = setCursor,
@@ -15,17 +15,17 @@ struct lcd_ops default_ops = {
 // When the display powers up, it is configured as follows:
 //
 // 1. Display clear
-// 2. Function set: 
-//    DL = 1; 8-bit interface data 
-//    N = 0; 1-line display 
-//    F = 0; 5x8 dot character font 
-// 3. Display on/off control: 
-//    D = 0; Display off 
-//    C = 0; Cursor off 
-//    B = 0; Blinking off 
-// 4. Entry mode set: 
-//    I/D = 1; Increment by 1 
-//    S = 0; No shift 
+// 2. Function set:
+//    DL = 1; 8-bit interface data
+//    N = 0; 1-line display
+//    F = 0; 5x8 dot character font
+// 3. Display on/off control:
+//    D = 0; Display off
+//    C = 0; Cursor off
+//    B = 0; Blinking off
+// 4. Entry mode set:
+//    I/D = 1; Increment by 1
+//    S = 0; No shift
 //
 // Note, however, that resetting the Arduino doesn't reset the LCD, so we
 // can't assume that its in that state when a sketch starts (and the
@@ -41,7 +41,7 @@ void lcd_init(struct LiquidCrystal *lcd, uint8_t fourbitmode, uint8_t rs, uint8_
 			 uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7)
 {
 
-  set_ops(lcd, &default_ops);
+  set_ops(lcd, &lcd_default_ops);
   lcd->_rs_pin = rs;
   lcd->_rw_pin = rw;
   lcd->_enable_pin = enable;
@@ -107,11 +107,11 @@ void begin(struct LiquidCrystal *lcd, uint8_t cols, uint8_t lines, uint8_t dotsi
     delayMicroseconds(4500); // wait min 4.1ms
 
     // third go!
-    write4bits(lcd, 0x03); 
+    write4bits(lcd, 0x03);
     delayMicroseconds(150);
 
     // finally, set to 4-bit interface
-    write4bits(lcd, 0x02); 
+    write4bits(lcd, 0x02);
   } else {
     // this is according to the hitachi HD44780 datasheet
     // page 45 figure 23
@@ -129,10 +129,10 @@ void begin(struct LiquidCrystal *lcd, uint8_t cols, uint8_t lines, uint8_t dotsi
   }
 
   // finally, set # lines, font size, etc.
-  command(lcd, LCD_FUNCTIONSET | lcd->_displayfunction);  
+  command(lcd, LCD_FUNCTIONSET | lcd->_displayfunction);
 
   // turn the display on with no cursor or blinking default
-  lcd->_displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;  
+  lcd->_displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
   display(lcd);
 
   // clear it off
