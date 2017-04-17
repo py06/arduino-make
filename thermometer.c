@@ -22,7 +22,6 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 #include <dht.h>
-#include <stdio.h>
 
 #define AREF_VOLTAGE 3.3
 #define TEMP_PIN 1
@@ -39,11 +38,11 @@ struct dht DHT;
 
 void setup()
 {
-	Serial.begin(9600);
 	analogReference(EXTERNAL); /*tell analog input to use an external
 	       			voltage ref and tie AREF pin to some
 	       			voltage (3.3 in my case) */
 	lcd_init(&lcd, 0, 12, 10, 11, 9, 8, 7, 6, 5, 4, 3, 2);
+	dht_init(&DHT);
 
 	pinMode(BACKLIGHT, OUTPUT);
 	digitalWrite(BACKLIGHT, HIGH); // turn backlight on. Replace 'HIGH' with 'LOW' to turn it off.
@@ -61,7 +60,6 @@ void setup()
 	lcd.ops.setCursor(&lcd, 0, 1);           // set cursor to column 0, row 1
 	lcd.ops.print(&lcd, "peewhy.net");
 	delay(2000);
-
 }
 
 //static float read_temp()
@@ -73,7 +71,8 @@ void setup()
 //}
 //
 
-static void update_temp(struct LiquidCrystal *lcd, float temp, float hum, int light)
+static void update_temp(struct LiquidCrystal *lcd, float temp, float hum,
+			int light)
 {
 	char str[16];
 	int valint, valdec;
@@ -94,7 +93,7 @@ static void update_temp(struct LiquidCrystal *lcd, float temp, float hum, int li
 	lcd->ops.print(lcd, str);
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	static unsigned long timer;
 	static int deciSeconds = 0;
@@ -107,7 +106,6 @@ int main(int argc, char *argv[])
 	USBDevice.attach();
 #endif
 	setup();
-	Serial.println(millis());
 	timer = millis();
 
 	for(;;) {
